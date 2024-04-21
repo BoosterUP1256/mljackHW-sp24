@@ -1,0 +1,12 @@
+class WhileTest {
+    function void main() {
+        var int counter;
+        let counter = 0;
+
+        while (~(counter = 10)) {
+            do output.PrintInt(counter);
+            let counter = counter + 1;
+        }
+        return;
+    }
+}

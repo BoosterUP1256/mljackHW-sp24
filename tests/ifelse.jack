@@ -1,0 +1,14 @@
+class ifelse {
+    function void main() {
+        var boolean value;
+
+        let value = true;
+
+        if (value) {
+            do output.PrintInt(100);
+        } else {
+            do output.PrintInt(404);
+        }
+        return;
+    }
+}

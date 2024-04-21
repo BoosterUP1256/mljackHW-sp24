@@ -1,0 +1,14 @@
+function If.main 1
+push constant 0
+not
+pop local 0
+push local 0
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 100
+call output.PrintInt 1
+pop temp 0
+label IF_FALSE0
+push constant 0
+return

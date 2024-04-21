@@ -1,0 +1,14 @@
+function IfTest.main 1
+push constant 0
+not
+pop local 0
+push local 0
+if-goto L0
+goto L1
+label L0
+push constant 100
+call output.PrintInt 1
+pop temp 0
+label L1
+push constant 0
+return

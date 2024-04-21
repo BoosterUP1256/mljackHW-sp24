@@ -120,10 +120,10 @@ open jackAS;
       TextIO.output(TextIO.stdOut, "Attempt to call letval\n");
       let val _ = codegen(expr,outFile,bindings,className)
           val binding = boundTo(id, bindings)
+          val segment = #2 binding
           val offset = #3 binding
       in
-        TextIO.output(outFile, "pop local "^Int.toString(offset)^"\n")
-        (* TextIO.output(outFile, "push local "^Int.toString(offset)^"\n") *)
+        TextIO.output(outFile, "pop "^segment^" "^Int.toString(offset)^"\n")
       end
      )
 
@@ -131,9 +131,10 @@ open jackAS;
      (
       TextIO.output(TextIO.stdOut, "Attempt to call id: "^identifier^"\n");
       let val binding = boundTo(identifier, bindings)
+          val segment = #2 binding
           val offset = #3 binding
       in
-        TextIO.output(outFile, "push local "^Int.toString(offset)^"\n")
+        TextIO.output(outFile, "push "^segment^" "^Int.toString(offset)^"\n")
       end
      )
 
@@ -146,13 +147,17 @@ open jackAS;
 
    | codegen(and'(term, expr),outFile,bindings,className) =
      (
-      TextIO.output(TextIO.stdOut, "Attempt to compile and\n")
+      TextIO.output(TextIO.stdOut, "Attempt to compile and\n");
+      (* TextIO.output(outFile, "AND HAPPENS HERE\n"); *)
+      codegen(term,outFile,bindings,className);
+      codegen(expr,outFile,bindings,className);
+      TextIO.output(outFile, "and\n")
      )
 
-   | codegen(or'(term, expr),outFile,bindings,className) =
+   (* | codegen(or'(term, expr),outFile,bindings,className) =
      (
       TextIO.output(TextIO.stdOut, "Attempt to compile or\n")
-     )
+     ) *)
 
    | codegen(lt'(term, expr),outFile,bindings,className) =
      (
@@ -173,27 +178,31 @@ open jackAS;
 
    | codegen(equal'(term, expr),outFile,bindings,className) =
      (
-      TextIO.output(TextIO.stdOut ,"Attempt to compile equal\n")
+      TextIO.output(TextIO.stdOut ,"Attempt to compile equal\n");
+      (* TextIO.output(outFile ,"EQUAL HAPPENSE HERE\n"); *)
+      codegen(term,outFile,bindings,className);
+      codegen(expr,outFile,bindings,className);
+      TextIO.output(outFile, "eq\n")
      )
 
    | codegen(while'(expr,statementList),outFile,bindings,className) =
      (
       TextIO.output(TextIO.stdOut, "Attempt to call while loop\n");
-      TextIO.output(outFile, "label "^nextLabel()^"\n");
-      codegen(expr,outFile,bindings,className);
-      TextIO.output(outFile, "not\nif-goto "^nextLabel()^"\n");
-      codegenlist(statementList,outFile,bindings,className)
+      let val whileExp = nextLabel()
+          val whileEnd = nextLabel()
+      in
+        TextIO.output(outFile, "label "^whileExp^"\n");
+        codegen(expr,outFile,bindings,className);
+        TextIO.output(outFile, "not\nif-goto "^whileEnd^"\n");
+        codegenlist(statementList,outFile,bindings,className);
+        TextIO.output(outFile, "goto "^whileExp^"\n");
+        TextIO.output(outFile, "label "^whileEnd^"\n")
+      end
      )
 
-   (* | codegen(if'(expr,statementList),outFile,bindings,className) =
+   | codegen(if'(expr,statementList),outFile,bindings,className) =
      (
-      TextIO.output(TextIO.stdOut, "Attempt to compile if\n")
-     ) *)
-
-   | codegen(ifelse'(expr,statementList1,statementList2),outFile,bindings,className) =
-     (
-      TextIO.output(TextIO.stdOut, "Attempt to compile ifelse\n");
-      TextIO.output(outFile, "IFELSE HAPPENSE HERE\n");
+      TextIO.output(TextIO.stdOut, "Attempt to compile if\n");
       let val ifTrue = nextLabel()
           val ifFalse = nextLabel()
       in
@@ -201,7 +210,28 @@ open jackAS;
         TextIO.output(outFile, "if-goto "^ifTrue^"\n");
         TextIO.output(outFile, "goto "^ifFalse^"\n");
         TextIO.output(outFile, "label "^ifTrue^"\n");
-        codegenlist(statementList1,outFile,bindings,className) (* TODO" pick up here figure out why nothing is generating for this *)
+        codegenlist(statementList,outFile,bindings,className);
+        TextIO.output(outFile, "label "^ifFalse^"\n")
+      end
+     )
+
+   | codegen(ifelse'(expr,statementList1,statementList2),outFile,bindings,className) =
+     (
+      TextIO.output(TextIO.stdOut, "Attempt to compile ifelse\n");
+      (* TextIO.output(outFile, "IFELSE HAPPENSE HERE\n"); *)
+      let val ifTrue = nextLabel()
+          val ifFalse = nextLabel()
+          val ifEnd = nextLabel()
+      in
+        codegen(expr,outFile,bindings,className);
+        TextIO.output(outFile, "if-goto "^ifTrue^"\n");
+        TextIO.output(outFile, "goto "^ifFalse^"\n");
+        TextIO.output(outFile, "label "^ifTrue^"\n");
+        codegenlist(statementList1,outFile,bindings,className);
+        TextIO.output(outFile, "goto "^ifEnd^"\n");
+        TextIO.output(outFile, "label "^ifFalse^"\n");
+        codegenlist(statementList2,outFile,bindings,className);
+        TextIO.output(outFile, "label "^ifEnd^"\n")
       end
      )
 	 
@@ -214,13 +244,23 @@ open jackAS;
 	 (TextIO.output(TextIO.stdOut, "Attempt returnvoid statement\n");
 		TextIO.output(outFile, "push constant 0\nreturn\n"))
 
+   | codegen(return'(expr),outFile,bindings,className) =
+     (
+      TextIO.output(TextIO.stdOut, "Attemt to compile return statement\n");
+      codegen(expr,outFile,bindings,className);
+      TextIO.output(outFile, "return\n")
+     )
+
    | codegen(true',outFile,bindings,className) =
      (TextIO.output(TextIO.stdOut, "found true\n");
      (* NOT SURE WHY THIS REQUIRES TWO LINES MIGHT HAVE TO COME BACK TO LATER *)
       TextIO.output(outFile, "push constant 0\nnot\n"))
 
    | codegen(false',outFile,bindings,className) =
-     (TextIO.output(TextIO.stdOut, "found false\n"))
+     (
+      TextIO.output(TextIO.stdOut, "found false\n");
+      TextIO.output(outFile, "push constant 0\n")
+     )
    
    | codegen(integer'(value),outFile,bindings,className) =
      (TextIO.output(TextIO.stdOut, "found number "^Int.toString(value)^"\n");
