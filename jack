@@ -1,0 +1,5 @@
+#!/bin/bash
+set -f
+echo -n "Enter an file name: "
+read file
+sml @SMLload=jackcomp $file

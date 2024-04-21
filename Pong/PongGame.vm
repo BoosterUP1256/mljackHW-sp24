@@ -1,0 +1,2 @@
+function PongGame.newInstance 0
+function PongGame.getInstance 0

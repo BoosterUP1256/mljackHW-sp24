@@ -1,0 +1,2 @@
+Skeleton 5
+ae"jackLrValsFun"i2aä¢Token"gp1c"TOKEN"f±ÿjh2aä¢ParserData"h7aä¢Header"h1egp1d"jackAS"aä¢LrTable"gp2ÿÿCaÿgpÿ(båçð±ÿf6d"Char"Cd"List"d"String"d"General"ÿd"Array"Nbåçð±ÿ?aä¢MlyValue"è0ad"EC"h2ÿ3bÿ‚+æ±ÿ‚2ad"Actions"h2bÿ‚+f2ÿÿ‚2ÿƒNaä¢Tokens"jÿ‚=çð±ã¢jack_TOKENS"h2aÿ/gp1c"PARSER_DATA"aÿƒ1ÿƒ>

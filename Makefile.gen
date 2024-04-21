@@ -1,0 +1,11 @@
+#!/bin/csh
+sml << EOF
+
+CM.make "sources.cm";
+
+SMLofNJ.exportFn("jackcomp",jack.run);
+
+EOF
+
+
+
