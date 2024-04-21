@@ -1,0 +1,8 @@
+function SquareGame.new 0
+push constant 0
+push constant 0
+push constant 30
+call Square.new 3
+pop this 0
+push constant 0
+pop this 1

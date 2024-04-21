@@ -98,13 +98,18 @@ open jackAS;
 	  end)
 
        | codegen(constructor'(typ,id,params,(vardecs,statements)),outFile,bindings,className) =
-	 TextIO.output(TextIO.stdOut, "Attempt to compile constructor named "^id^"\n")
+         (
+	        TextIO.output(TextIO.stdOut, "Attempt to compile constructor named "^id^"\n");
+          TextIO.output(outFile, "function "^className^"."^id^" "^Int.toString(length vardecs)^"\n");
+          (* TODO: ALOCATE MEMORY HERE *)
+          codegenlist(statements,outFile,createParamBindings(params,0)@createLocalBindings(vardecs)@bindings,className)
+         )
 
        | codegen(function'(typ,id,params,(vardecs,statements)),outFile,bindings,className) =
 	 (TextIO.output(TextIO.stdOut, "Attempt to compile function named "^id^"\n");
 	  TextIO.output(outFile,"function "^className^"."^id^" "^Int.toString(length vardecs)^"\n");
     (* ON NEXT LINE IN createParamBindings I don't think offset should be hardcoded as 0 FIX LATER! *)
-	  codegenlist(statements,outFile,createParamBindings(params,0)@createLocalBindings(vardecs),className))
+	  codegenlist(statements,outFile,createParamBindings(params,0)@createLocalBindings(vardecs)@bindings,className))
 
        | codegen(method'(typ,id,params,(vardecs,statements)),outFile,bindings,className) =
 	 TextIO.output(TextIO.stdOut, "Attempt to compile method named "^id^"\n")
@@ -287,7 +292,7 @@ open jackAS;
      (TextIO.output(TextIO.stdOut, "Attempt to call times\n");
       codegen(term,outFile,bindings,className);
       codegen(expression,outFile,bindings,className);
-      TextIO.output(outFile, "call Math.multiply 2\n")) 
+      TextIO.output(outFile, "call Math.multiply 2\n"))
 
        | codegen(_,outFile,bindings,className) =
          (TextIO.output(TextIO.stdOut, "Attempt to compile expression not currently supported!\n");
