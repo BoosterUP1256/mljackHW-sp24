@@ -101,15 +101,20 @@ open jackAS;
          (
 	        TextIO.output(TextIO.stdOut, "Attempt to compile constructor named "^id^"\n");
           TextIO.output(outFile, "function "^className^"."^id^" "^Int.toString(length vardecs)^"\n");
-          (* TODO: ALOCATE MEMORY HERE *)
+          (* TODO: ALOCATE MEMORY HERE HINT: CALLS NEW ARRAY METHOD OR SOMETHING*)
           codegenlist(statements,outFile,createParamBindings(params,0)@createLocalBindings(vardecs)@bindings,className)
          )
 
        | codegen(function'(typ,id,params,(vardecs,statements)),outFile,bindings,className) =
-	 (TextIO.output(TextIO.stdOut, "Attempt to compile function named "^id^"\n");
-	  TextIO.output(outFile,"function "^className^"."^id^" "^Int.toString(length vardecs)^"\n");
-    (* ON NEXT LINE IN createParamBindings I don't think offset should be hardcoded as 0 FIX LATER! *)
-	  codegenlist(statements,outFile,createParamBindings(params,0)@createLocalBindings(vardecs)@bindings,className))
+	       (
+          TextIO.output(TextIO.stdOut, "Attempt to compile function named "^id^"\n");
+          let val localBindings = createLocalBindings(vardecs)
+          in
+	          TextIO.output(outFile,"function "^className^"."^id^" "^Int.toString(length(localBindings))^"\n"); (* TODO: Use LetVal and createLocalBindings to get correct length!!! *)
+            (* SECOND PARAM HARDCODED TO ZERO FOR FUNCTIONS AND CUNSTRUCTORS AND ONE FOR METHODS*)
+	          codegenlist(statements,outFile,createParamBindings(params,0)@localBindings@bindings,className)
+          end
+         )
 
        | codegen(method'(typ,id,params,(vardecs,statements)),outFile,bindings,className) =
 	 TextIO.output(TextIO.stdOut, "Attempt to compile method named "^id^"\n")
