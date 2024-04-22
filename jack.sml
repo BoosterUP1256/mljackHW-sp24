@@ -124,7 +124,15 @@ open jackAS;
          )
 
        | codegen(method'(typ,id,params,(vardecs,statements)),outFile,bindings,className) =
-	 TextIO.output(TextIO.stdOut, "Attempt to compile method named "^id^"\n")
+         (
+          let val localBindings = createLocalBindings(vardecs)
+          in
+	          (* TextIO.output(TextIO.stdOut, "Attempt to compile method named "^id^"\n"); *)
+	          TextIO.output(outFile, "function "^className^"."^id^" "^Int.toString(length(localBindings))^"\n");
+            TextIO.output(outFile, "push argument 0\npop pointer 0\n"); (* AGAIN NOT SURE IF THIS IS SUPOSED TO BE HARDCODED *)
+            codegenlist(statements,outFile,createParamBindings(params,1)@localBindings@bindings,className)
+          end
+         )
 
        | codegen(this',outFile,bindings,className) =
          (
