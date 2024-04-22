@@ -100,9 +100,16 @@ open jackAS;
        | codegen(constructor'(typ,id,params,(vardecs,statements)),outFile,bindings,className) =
          (
 	        TextIO.output(TextIO.stdOut, "Attempt to compile constructor named "^id^"\n");
-          TextIO.output(outFile, "function "^className^"."^id^" "^Int.toString(length vardecs)^"\n");
-          (* TODO: ALOCATE MEMORY HERE HINT: CALLS NEW ARRAY METHOD OR SOMETHING*)
-          codegenlist(statements,outFile,createParamBindings(params,0)@createLocalBindings(vardecs)@bindings,className)
+          let val localBindings = createLocalBindings(vardecs)
+          in
+            TextIO.output(outFile, "function "^className^"."^id^" "^Int.toString(length(localBindings))^"\n");
+            (* TODO: ALOCATE MEMORY HERE HINT: CALLS NEW ARRAY METHOD OR SOMETHING*)
+            TextIO.output(outFile, "push constant "^Int.toString(length(bindings))^"\n");
+            (* I AM NOT SURE IF THESE NEXT TWO LINES SHOULD BE HARDCODED BUT I CANT FIND ANY EXAMPLES WHERE THIS IS NOT ONE *)
+            TextIO.output(outFile, "call Memory.alloc 1\n");
+            TextIO.output(outFile, "pop pointer 0\n");
+            codegenlist(statements,outFile,createParamBindings(params,0)@localBindings@bindings,className)
+          end
          )
 
        | codegen(function'(typ,id,params,(vardecs,statements)),outFile,bindings,className) =
@@ -118,6 +125,13 @@ open jackAS;
 
        | codegen(method'(typ,id,params,(vardecs,statements)),outFile,bindings,className) =
 	 TextIO.output(TextIO.stdOut, "Attempt to compile method named "^id^"\n")
+
+       | codegen(this',outFile,bindings,className) =
+         (
+          (* TextIO.output(outFile, "THIS CODEGEN CALLED HERE\n"); *)
+          TextIO.output(TextIO.stdOut, "Attempt to compile this\n");
+          TextIO.output(outFile, "push pointer 0\n") (* AGAIN NOT SURE IF THIS SHOULD BE HARDCODED BUT I WILL FIX IT LATER IF I NEED TO *)
+         )
 	 
 	 | codegen(do'(call),outFile,bindings,className) =
 	 (TextIO.output(TextIO.stdOut, "Attempt to call a subroutine with a do statement\n");
@@ -245,10 +259,21 @@ open jackAS;
       end
      )
 	 
+   | codegen(subcall'(id,exprlist),outFile,bindings,className) =
+     (
+      TextIO.output(TextIO.stdOut, "ATTEMPT TO CALL "^id^" HAPPENS HERE\n");
+      (* TextIO.output(outFile, "ATTEMPT TO CALL "^id^" HAPPENS HERE\n"); *)
+      TextIO.output(outFile, "push pointer 0\n"); (* NOT SURE IF THIS SHOULD BE HARDCOED MIGHT HAVE TO FIX LATER *)
+      codegenlist(exprlist,outFile,bindings,className);
+      TextIO.output(outFile, "call "^className^"."^id^" "^Int.toString(length(exprlist)+1)^"\n")
+     )
+
 	 | codegen(subcallq'(id1,id2,exprlist),outFile,bindings,className) =
-	 (TextIO.output(TextIO.stdOut, "Attempt to call "^id1^"."^id2^"\n");
-		codegenlist(exprlist,outFile,bindings,className);
-    TextIO.output(outFile, "call "^id1^"."^id2^" "^Int.toString(length(exprlist))^"\n"))
+	   (
+      TextIO.output(TextIO.stdOut, "Attempt to call "^id1^"."^id2^"\n");
+		  codegenlist(exprlist,outFile,bindings,className);
+      TextIO.output(outFile, "call "^id1^"."^id2^" "^Int.toString(length(exprlist))^"\n")
+     )
 	 
 	 | codegen(returnvoid',outFile,bindings,className) =
 	 (TextIO.output(TextIO.stdOut, "Attempt returnvoid statement\n");
