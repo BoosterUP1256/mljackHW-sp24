@@ -186,10 +186,13 @@ open jackAS;
       TextIO.output(outFile, "and\n")
      )
 
-   (* | codegen(or'(term, expr),outFile,bindings,className) =
+   | codegen(or'(term, expr),outFile,bindings,className) =
      (
-      TextIO.output(TextIO.stdOut, "Attempt to compile or\n")
-     ) *)
+      TextIO.output(TextIO.stdOut, "Attempt to compile or\n");
+      codegen(term,outFile,bindings,className);
+      codegen(expr,outFile,bindings,className);
+      TextIO.output(outFile, "or\n")
+     )
 
    | codegen(lt'(term, expr),outFile,bindings,className) =
      (
