@@ -339,6 +339,61 @@ open jackAS;
       codegen(expression,outFile,bindings,className);
       TextIO.output(outFile, "call Math.multiply 2\n"))
 
+   | codegen(div'(term, expression),outFile,bindings,className) =
+     (TextIO.output(TextIO.stdOut, "Attempt to call divide\n");
+      codegen(term,outFile,bindings,className);
+      codegen(expression,outFile,bindings,className);
+      TextIO.output(outFile, "call Math.divide 2\n"))
+
+   | codegen(string'(str),outFile,bindings,className) =
+     (
+      TextIO.output(TextIO.stdOut, "found string "^str^"\n");
+      TextIO.output(outFile, "push constant "^Int.toString(size(str))^"\n");
+      TextIO.output(outFile, "call String.new 1\n");
+      
+      let val strList = explode(str)
+          fun helper(c) = 
+          (
+            TextIO.output(outFile, "push constant "^Int.toString(ord(c))^"\n"); (* MIGHT HAVE TO CHANGE THIS HARDCODING BUT I ACTUALLY DONT THINK SO FOR THIS LINE*)
+            TextIO.output(outFile, "call String.appendChar 2\n")
+          )
+      in
+        app helper strList
+      end
+     )
+
+   | codegen(letarray'(id, expr1, expr2),outFile,bindings,className) =
+     (
+      TextIO.output(TextIO.stdOut, "Attempt to compile letarray\n");
+      (* TextIO.output(outFile, "LETARRAY\n"); *)
+      codegen(expr1,outFile,bindings,className);
+
+      let val(typ,segment,offset) = boundTo(id, bindings)
+      in
+        TextIO.output(outFile, "push "^segment^" "^Int.toString(offset)^"\n")
+      end;
+
+      TextIO.output(outFile, "add\n"); (* NOT REALLY SURE WHY THIS NEEDS TO BE HERE BUT WHATEVER I GUESS *)
+
+      codegen(expr2,outFile,bindings,className);
+
+      TextIO.output(outFile, "pop temp 0\npop pointer 1\npush temp 0\npop that 0\n") (* I AM EXTREMLY SUSPECIOUS ABOUT HOW HARDCODED THIS LINE IS BUT I GUESS ILL LEAVE IT FOR NOW *)
+     )
+
+   | codegen(idarray'(id, expr),outFile,bindings,className) =
+     (
+      TextIO.output(TextIO.stdOut, "Attempt to compile idarray\n");
+      
+      codegen(expr,outFile,bindings,className);
+      
+      let val(typ,segment,offset) = boundTo(id, bindings)
+      in
+        TextIO.output(outFile, "push "^segment^" "^Int.toString(offset)^"\n")
+      end;
+      
+      TextIO.output(outFile, "add\npop pointer 1\npush that 0\n")
+     )
+
        | codegen(_,outFile,bindings,className) =
          (TextIO.output(TextIO.stdOut, "Attempt to compile expression not currently supported!\n");
           raise Unimplemented) 

@@ -1,0 +1,15 @@
+class ArrayTest {
+    function void main() {
+        var int length;
+        var int dummy;
+        var array a;
+
+        let length = 3;
+        let dummy = 100;
+        let a = Array.new(length);
+        let a[0] = 1;
+        let a[1] = 2;
+        let a[2] = 3;
+        return;
+    }
+}
