@@ -280,7 +280,14 @@ open jackAS;
 	   (
       TextIO.output(TextIO.stdOut, "Attempt to call "^id1^"."^id2^"\n");
 		  codegenlist(exprlist,outFile,bindings,className);
-      TextIO.output(outFile, "call "^id1^"."^id2^" "^Int.toString(length(exprlist))^"\n")
+
+      let val (typ,segment,offset) = boundTo(id1, bindings)
+          in
+            TextIO.output(TextIO.stdOut, Int.toString(offset)^" "^segment^"\n");
+            TextIO.output(outFile, "push "^segment^" "^Int.toString(offset)^"\n");
+            TextIO.output(outFile, "call "^typ^"."^id2^" "^Int.toString(length(exprlist)+1)^"\n")
+          end
+          handle unboundId => (TextIO.output(outFile, "call "^id1^"."^id2^" "^Int.toString(length(exprlist))^"\n"))
      )
 	 
 	 | codegen(returnvoid',outFile,bindings,className) =
