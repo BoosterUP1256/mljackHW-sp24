@@ -101,10 +101,11 @@ open jackAS;
          (
 	        TextIO.output(TextIO.stdOut, "Attempt to compile constructor named "^id^"\n");
           let val localBindings = createLocalBindings(vardecs)
+              val numFields = numBindings("this", bindings)
           in
             TextIO.output(outFile, "function "^className^"."^id^" "^Int.toString(length(localBindings))^"\n");
             (* TODO: ALOCATE MEMORY HERE HINT: CALLS NEW ARRAY METHOD OR SOMETHING*)
-            TextIO.output(outFile, "push constant "^Int.toString(length(bindings))^"\n");
+            TextIO.output(outFile, "push constant "^Int.toString(numFields)^"\n");
             (* I AM NOT SURE IF THESE NEXT TWO LINES SHOULD BE HARDCODED BUT I CANT FIND ANY EXAMPLES WHERE THIS IS NOT ONE *)
             TextIO.output(outFile, "call Memory.alloc 1\n");
             TextIO.output(outFile, "pop pointer 0\n");
@@ -223,6 +224,7 @@ open jackAS;
    | codegen(while'(expr,statementList),outFile,bindings,className) =
      (
       TextIO.output(TextIO.stdOut, "Attempt to call while loop\n");
+      (* TextIO.output(outFile, "DEBUG: while\n"); *)
       let val whileExp = nextLabel()
           val whileEnd = nextLabel()
       in
@@ -238,6 +240,7 @@ open jackAS;
    | codegen(if'(expr,statementList),outFile,bindings,className) =
      (
       TextIO.output(TextIO.stdOut, "Attempt to compile if\n");
+      (* TextIO.output(outFile, "DEBUG: if\n"); *)
       let val ifTrue = nextLabel()
           val ifFalse = nextLabel()
       in
@@ -253,6 +256,7 @@ open jackAS;
    | codegen(ifelse'(expr,statementList1,statementList2),outFile,bindings,className) =
      (
       TextIO.output(TextIO.stdOut, "Attempt to compile ifelse\n");
+      (* TextIO.output(outFile, "DEBUG: ifelse\n"); *)
       (* TextIO.output(outFile, "IFELSE HAPPENSE HERE\n"); *)
       let val ifTrue = nextLabel()
           val ifFalse = nextLabel()
@@ -273,6 +277,7 @@ open jackAS;
    | codegen(subcall'(id,exprlist),outFile,bindings,className) =
      (
       TextIO.output(TextIO.stdOut, "ATTEMPT TO CALL "^id^" HAPPENS HERE\n");
+      (* TextIO.output(outFile, "DEBUG: subcall\n"); *)
       (* TextIO.output(outFile, "ATTEMPT TO CALL "^id^" HAPPENS HERE\n"); *)
       TextIO.output(outFile, "push pointer 0\n"); (* NOT SURE IF THIS SHOULD BE HARDCOED MIGHT HAVE TO FIX LATER *)
       codegenlist(exprlist,outFile,bindings,className);
@@ -282,15 +287,23 @@ open jackAS;
 	 | codegen(subcallq'(id1,id2,exprlist),outFile,bindings,className) =
 	   (
       TextIO.output(TextIO.stdOut, "Attempt to call "^id1^"."^id2^"\n");
-		  codegenlist(exprlist,outFile,bindings,className);
+      (* TextIO.output(outFile, "DEBUG: subcallq\n"); *)
+		  (* codegenlist(exprlist,outFile,bindings,className); *)
 
       let val (typ,segment,offset) = boundTo(id1, bindings)
           in
             TextIO.output(TextIO.stdOut, Int.toString(offset)^" "^segment^"\n");
             TextIO.output(outFile, "push "^segment^" "^Int.toString(offset)^"\n");
+
+            codegenlist(exprlist,outFile,bindings,className);
+
             TextIO.output(outFile, "call "^typ^"."^id2^" "^Int.toString(length(exprlist)+1)^"\n")
           end
-          handle unboundId => (TextIO.output(outFile, "call "^id1^"."^id2^" "^Int.toString(length(exprlist))^"\n"))
+          handle unboundId => 
+          (
+            codegenlist(exprlist,outFile,bindings,className);
+            TextIO.output(outFile, "call "^id1^"."^id2^" "^Int.toString(length(exprlist))^"\n")
+          )
      )
 	 
 	 | codegen(returnvoid',outFile,bindings,className) =
