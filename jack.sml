@@ -410,9 +410,15 @@ open jackAS;
       TextIO.output(outFile, "add\npop pointer 1\npush that 0\n")
      )
 
-       | codegen(_,outFile,bindings,className) =
+   | codegen(null',outFile,bindings,className) =
+     (
+      TextIO.output(TextIO.stdOut, "Attempt to compile null\n");
+      TextIO.output(outFile, "push constant 0\n")
+     )
+
+       (* | codegen(_,outFile,bindings,className) =
          (TextIO.output(TextIO.stdOut, "Attempt to compile expression not currently supported!\n");
-          raise Unimplemented) 
+          raise Unimplemented)  *)
 
      and codegenlist([],outFile,bindings,className) = ()
        | codegenlist(h::t,outFile,bindings,className) =
